@@ -61,27 +61,27 @@ server.post('/api/users', (req,res) => {
 
 // Change new user info
 server.put('/api/users/:id', (req,res) => {
-    const user = req.params.id;
+    const { id } = req.params;
     const userInfo = req.body;
 
-    Data.update(user, userInfo)
-    .then(data => {
-            if(userInfo.name == null || userInfo.bio == null){
-                res.status(400).json({errorMessage:"Please provide name and bio for the user."})
+    if(!userInfo.name || !userInfo.bio){
+        res.status(400).json({errorMessage:"Please provide name and bio for the user."})
+    } else {
+        Data.update(id, userInfo)
+        .then(user => {
+            if(!user){
+                res.status(404).json({errorMessage:"The user with the specified ID does not exist."});                
             }
-            else if(!user){
-                res.status(404).json({errorMessage:"The user with the specified ID does not exist."}) 
-            }
-            else{
-                res.status(200).json(data);
+            else {
+                res.status(200).json(user)
             }
         })
-    .catch(err => {
+        .catch(err => {
             console.log(err)
             res.status(500).json({errMessage:'There was an error while saving the user to the database' })
-        });
+        })    
     }
-)
+})
 
 // Delete user
 server.delete('/api/users/:id', (req, res) => {
